@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Location Prediction System</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 20px;
+            }
+            
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                overflow: hidden;
+            }
+            
+            .header {
+                background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+                color: white;
+                padding: 30px;
+                text-align: center;
+            }
+            
+            .header h1 {
+                font-size: 28px;
+                margin-bottom: 10px;
+            }
+            
+            .header p {
+                opacity: 0.9;
+            }
+            
+            .form-container {
+                padding: 30px;
+            }
+            
+            .form-group {
+                margin-bottom: 20px;
+            }
+            
+            label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #2c3e50;
+            }
+            
+            input, select {
+                width: 100%;
+                padding: 12px 15px;
+                border: 2px solid #e1e8ed;
+                border-radius: 8px;
+                font-size: 16px;
+                transition: border-color 0.3s;
+            }
+            
+            input:focus, select:focus {
+                outline: none;
+                border-color: #3498db;
+            }
+            
+            .btn {
+                background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                font-size: 16px;
+                font-weight: 600;
+                border-radius: 8px;
+                cursor: pointer;
+                width: 100%;
+                transition: transform 0.2s;
+            }
+            
+            .btn:hover {
+                transform: translateY(-2px);
+            }
+            
+            .result {
+                margin-top: 30px;
+                padding: 20px;
+                border-radius: 10px;
+                display: none;
+            }
+            
+            .success {
+                background: #d4edda;
+                border: 1px solid #c3e6cb;
+                color: #155724;
+            }
+            
+            .error {
+                background: #f8d7da;
+                border: 1px solid #f5c6cb;
+                color: #721c24;
+            }
+            
+            .breakdown {
+                margin-top: 15px;
+            }
+            
+            .breakdown-item {
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 0;
+                border-bottom: 1px solid rgba(0,0,0,0.1);
+            }
+            
+            .confidence-bar {
+                background: #e9ecef;
+                border-radius: 10px;
+                height: 10px;
+                margin-top: 5px;
+                overflow: hidden;
+            }
+            
+            .confidence-fill {
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                height: 100%;
+                transition: width 0.5s;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>📍 Location Prediction System</h1>
+                <p>Predict where people are most likely to be based on time and profile</p>
+            </div>
+            
+            <div class="form-container">
+                <form id="predictionForm">
+                    <div class="form-group">
+                        <label for="start_time">Start Time:</label>
+                        <input type="datetime-local" id="start_time" name="start_time" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="end_time">End Time:</label>
+                        <input type="datetime-local" id="end_time" name="end_time" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="role">Role:</label>
+                        <select id="role" name="role" required>
+                            <option value="">Select Role</option>
+                            <option value="student">Student</option>
+                            <option value="professor">Professor</option>
+                            <option value="Engineer">Engineer</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Intern">Intern</option>
+                            <option value="staff">Staff</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="department">Department:</label>
+                        <select id="department" name="department" required>
+                            <option value="">Select Department</option>
+                            <option value="Physics">Physics</option>
+                            <option value="Maths">Maths</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="R&D">R&D</option>
+                            <option value="Sales">Sales</option>
+                            <option value="HR">HR</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn">Predict Location</button>
+                </form>
+                
+                <div id="result" class="result"></div>
+            </div>
+        </div>
+
+        <script>
+            document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const submitBtn = this.querySelector('button');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Predicting...';
+                submitBtn.disabled = true;
+                
+                const formData = new FormData(this);
+                const data = {
+                    start_time: formData.get('start_time').replace('T', ' ') + ':00',
+                    end_time: formData.get('end_time').replace('T', ' ') + ':00',
+                    role: formData.get('role'),
+                    department: formData.get('department')
+                };
+                
+                try {
+                    const response = await fetch('predict_location.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    const resultDiv = document.getElementById('result');
+                    
+                    if (result.status === 'success') {
+                        resultDiv.innerHTML = `
+                            <div class="success">
+                                <h3>🎯 Prediction Results</h3>
+                                <p><strong>Most Likely Location:</strong> ${result.most_likely_location}</p>
+                                <p><strong>Confidence:</strong> ${(result.confidence * 100).toFixed(1)}%</p>
+                                
+                                <div class="breakdown">
+                                    <h4>Detailed Breakdown:</h4>
+                                    ${Object.entries(result.breakdown).map(([location, percentage]) => `
+                                        <div class="breakdown-item">
+                                            <span>${location}</span>
+                                            <span>${(percentage * 100).toFixed(1)}%</span>
+                                        </div>
+                                        <div class="confidence-bar">
+                                            <div class="confidence-fill" style="width: ${percentage * 100}%"></div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="error">
+                                <h3>❌ Error</h3>
+                                <p>${result.message || 'Prediction failed'}</p>
+                            </div>
+                        `;
+                    }
+                    
+                    resultDiv.style.display = 'block';
+                    
+                } catch (error) {
+                    document.getElementById('result').innerHTML = `
+                        <div class="error">
+                            <h3>❌ Request Failed</h3>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                    document.getElementById('result').style.display = 'block';
+                } finally {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            });
+
+            // Set default times
+            const now = new Date();
+            const startTime = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
+            const endTime = new Date(startTime.getTime() + 3 * 60 * 60 * 1000); // 3 hours later
+            
+            document.getElementById('start_time').value = formatDateTime(startTime);
+            document.getElementById('end_time').value = formatDateTime(endTime);
+            
+            function formatDateTime(date) {
+                return date.toISOString().slice(0, 16);
+            }
+        </script>
+    </body>
+    </html>
+    
