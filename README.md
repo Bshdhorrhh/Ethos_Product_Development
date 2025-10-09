@@ -38,9 +38,10 @@ Run command to setup database
 
 Run command to import data from csv files to mysql database
 ```php import_data.php```
-Run the project on ```locolhost://your_directory/index.php```.
+Run the project on ```http://localhost/your_directory/index.php```.
 
 Conclusion:
 CampusSight transforms reactive campus security into proactive intelligence, combining predictive monitoring, timeline reconstruction, and alerting, all while maintaining strong privacy and ethical standards.
+
 
 
