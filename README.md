@@ -34,12 +34,13 @@ Place trained_location_model.joblib in the project root directory.
 Place the face_images folder in the project root/data directory along with csv files.
 Create database in xampp phpMyAdmin with name "campus_entity_system"
 Run command to setup database
-```php setup_databse.php```
+```php setup_database.php```
 
 Run command to import data from csv files to mysql database
 ```php import_data.php```
-Run the project on locolhost://your_directory/index.php.
+Run the project on ```locolhost://your_directory/index.php```.
 
 Conclusion:
 CampusSight transforms reactive campus security into proactive intelligence, combining predictive monitoring, timeline reconstruction, and alerting, all while maintaining strong privacy and ethical standards.
+
 
