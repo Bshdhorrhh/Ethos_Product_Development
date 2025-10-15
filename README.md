@@ -1,4 +1,4 @@
-﻿# New_Ethos_Product_Development
+﻿# UDBHAV_PROJECT
 
 CampusSight: Campus Entity Resolution & Security Monitoring System
 
@@ -42,6 +42,7 @@ Run the project on ```http://localhost/your_directory/index.php```.
 
 Conclusion:
 CampusSight transforms reactive campus security into proactive intelligence, combining predictive monitoring, timeline reconstruction, and alerting, all while maintaining strong privacy and ethical standards.
+
 
 
 
